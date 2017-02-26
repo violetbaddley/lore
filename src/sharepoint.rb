@@ -25,6 +25,7 @@ class Sharepoint
     loop do
       client = @network.accept
       puts 'GOT CLIENT'
+      assert_local client
       client.set_encoding 'ASCII-8BIT'  # Better for raw data xfer; passes utf-8 through transparently
       @dispatch << proc do
 
@@ -56,6 +57,13 @@ class Sharepoint
   def assert_version sock
     if sock.gets("\n", 30).chomp != "lore #{VERSION}"
       raise "Client/server version mismatch; server on v#{VERSION}"
+    end
+  end
+
+  def assert_local sock
+    _, _, peername, peeraddr = sock.peeraddr(:hostname)
+    if peeraddr != '127.0.0.1' && peeraddr != "::1"
+      raise "Non-local client (#{peeraddr} #{peername}) attempting to connect! Refusing."
     end
   end
 
