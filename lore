@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+
+# LOcal REplica
+
+
+MAX_CLIENTS = 3
+VERSION = 1
+
+
+case ARGV.shift
+when 'offer'
+  require_relative 'src/sharepoint.rb'
+
+  name = ARGV.shift
+  path = ARGV.shift
+  port = ARGV.first&.to_i || 2022
+
+  sharepoint = Sharepoint.new name, path, port
+  begin
+    sharepoint.offer
+  rescue SignalException => sig
+    sharepoint.close
+  end
+
+
+when 'get'
+  require_relative 'src/client.rb'
+
+  serv_addr = ARGV.shift
+  file = ARGV.shift
+  port = ARGV.first&.to_i || 2022
+
+  Client.get serv_addr, file, port
+
+end
